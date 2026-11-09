@@ -115,7 +115,7 @@ if (!status) {
   process.exit(1);
 }
 if (!status.extensions) {
-  console.error(red('The extension is not connected. Open a Gemini Enterprise tab, or https://de.aipass.net/chat.'));
+  console.error(red('The extension is not connected. Open a signed-in Gemini Enterprise tab and leave it open.'));
   process.exit(1);
 }
 model ??= status.defaultModel;

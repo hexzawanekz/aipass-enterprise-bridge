@@ -48,4 +48,4 @@ exec "$BROWSER_BIN" \
     --disable-extensions-except=/app/extension \
     --user-data-dir=/app/chrome-data \
     --window-size=1280,800 --start-maximized \
-    "https://de.aipass.net/chat"
+    "https://vertexaisearch.cloud.google/"

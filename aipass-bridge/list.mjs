@@ -9,13 +9,10 @@ const what = argv[0] ?? 'models';
 // `npm run models -- --help` lands the flag after the subcommand, so look
 // anywhere rather than only at the first word.
 if (argv.some((a) => ['--help', '-h', 'help'].includes(a))) {
-  console.log(`usage: npm run models | npm run conversations | npm run credits
+  console.log(`usage: npm run models | npm run conversations
 
-  models [kind]  list models by category; kind narrows it (chat, research,
-                 image, video, music)
-  styles         video style presets, and what each provider will accept
+  models [kind]  list models; kind narrows the list (chat, research, image, video, music)
   conversations  list conversations, marking the one in use
-  credits        how much of the credit pool is left
 
   AIPASS_BRIDGE  bridge base URL (default: http://127.0.0.1:8787)
 
@@ -37,7 +34,7 @@ try {
     // all of it read from the app's own loaders rather than hardcoded here.
     const { styles, byProvider } = await get('/video-options?refresh=1');
     if (!styles.length) {
-      console.log('no styles returned — is a de.aipass.net tab open?');
+      console.log('no styles returned');
     } else {
       console.log('\nวิดีโอสไตล์ · video styles\n');
       for (const v of styles) {
@@ -94,7 +91,7 @@ try {
     for (const c of conversations) {
       console.log(`${c.id === current ? '*' : ' '} ${c.id}  ${c.updatedAt?.slice(0, 16) ?? ''}  ${c.title ?? ''}`);
     }
-    if (!conversations.length) console.log('none — start a chat at https://de.aipass.net/chat');
+    if (!conversations.length) console.log('none — reload the Gemini Enterprise tab');
   } else if (what === 'credits') {
     const q = await get('/quota');
     const n = (v) => v.toLocaleString('en-US', { maximumFractionDigits: v < 100 ? 2 : 0 });

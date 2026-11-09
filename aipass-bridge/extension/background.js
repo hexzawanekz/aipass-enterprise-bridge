@@ -1,6 +1,5 @@
 // Service worker: holds the long-lived connection to the local bridge and
-// routes each job into a Gemini Enterprise tab, or a de.aipass.net tab when
-// no Enterprise tab is open.
+// routes each job into a signed-in Gemini Enterprise tab.
 //
 // The connection lives here rather than in the content script because an
 // https:// page talking to http://127.0.0.1 runs into mixed-content and
@@ -15,8 +14,8 @@ let connected = false;
 let lastError = '';
 const jobTabs = new Map();
 
-// The content script's keepalive port only exists while a de.aipass.net tab is
-// open. With no tab the worker is evicted, the SSE stream dies with it, and the
+// The content script's keepalive port only exists while a Gemini Enterprise tab
+// is open. With no tab the worker is evicted, the SSE stream dies with it, and the
 // bridge reports the extension as gone until the one-minute alarm revives it —
 // so an offscreen document holds a port of its own, which is a context Chrome
 // does not discard.
@@ -38,7 +37,7 @@ function ensureOffscreenDocument() {
         // thing this document does. BLOBS is a stand-in; nothing here handles a
         // blob, and the justification says what is really going on.
         reasons: ['BLOBS'],
-        justification: 'Holds a port open so the service worker survives while no aipass tab is open',
+        justification: 'Holds a port open so the service worker survives while no Enterprise tab is open',
       });
     } catch (err) {
       // Losing a creation race is the outcome we wanted anyway.
@@ -81,28 +80,17 @@ async function post(path, body) {
   }
 }
 
-const CLASSIC_URLS = ['https://*.aipass.net/*', 'https://aipass.net/*'];
 const ENTERPRISE_URLS = ['https://vertexaisearch.cloud.google/*'];
-
-const isEnterprise = (tab) => typeof tab?.url === 'string' && tab.url.startsWith('https://vertexaisearch.cloud.google/');
 
 function preferTab(tabs) {
   const live = tabs.filter((t) => !t.discarded && t.status !== 'unloaded');
   const pool = live.length ? live : tabs;
-  return pool.find((t) => t.url?.includes('/cid/') || t.url?.includes('/chat')) ?? pool[0] ?? null;
+  return pool.find((t) => t.url?.includes('/cid/')) ?? pool[0] ?? null;
 }
 
 async function findChatTab() {
-  const [enterprise, classic] = await Promise.all([
-    chrome.tabs.query({ url: ENTERPRISE_URLS }),
-    chrome.tabs.query({ url: CLASSIC_URLS }),
-  ]);
-  const live = (tabs) => tabs.filter((t) => !t.discarded && t.status !== 'unloaded');
-  // A loaded Enterprise tab wins. A discarded one must not hide a working classic tab.
-  return preferTab(live(enterprise))
-    ?? preferTab(live(classic))
-    ?? preferTab(enterprise)
-    ?? preferTab(classic);
+  const tabs = await chrome.tabs.query({ url: ENTERPRISE_URLS });
+  return preferTab(tabs);
 }
 
 function waitForComplete(tabId, timeoutMs = 15_000) {
@@ -128,8 +116,7 @@ async function ensureContentScript(tab) {
     await waitForComplete(tab.id);
   }
 
-  const pageFile = isEnterprise(tab) ? 'enterprise.js' : 'page.js';
-  await chrome.scripting.executeScript({ target: { tabId: tab.id }, world: 'MAIN', files: [pageFile] }).catch(() => {});
+  await chrome.scripting.executeScript({ target: { tabId: tab.id }, world: 'MAIN', files: ['enterprise.js'] }).catch(() => {});
   if (!ok) {
     await chrome.scripting.executeScript({ target: { tabId: tab.id }, world: 'ISOLATED', files: ['content.js'] }).catch(() => {});
     await ping();
@@ -139,7 +126,7 @@ async function ensureContentScript(tab) {
 async function handleJob(job) {
   const tab = await findChatTab();
   if (!tab) {
-    await post('/ext/error', { jobId: job.jobId, message: 'no Gemini Enterprise or de.aipass.net tab is open' });
+    await post('/ext/error', { jobId: job.jobId, message: 'no Gemini Enterprise tab is open' });
     return;
   }
   jobTabs.set(job.jobId, tab.id);

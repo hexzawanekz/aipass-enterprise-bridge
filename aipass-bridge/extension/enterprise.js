@@ -296,7 +296,7 @@
       const text = String(job.text ?? '').trim();
       if (!text) throw new Error('The message was empty.');
       if ((job.parts ?? []).some((part) => part && part.type && part.type !== 'text')) {
-        throw new Error('This Enterprise tab accepts text. Image and file attachments stay on the classic chat tab.');
+        throw new Error('Send text. This bridge does not upload images or files.');
       }
       reply({ jobId: job.jobId, kind: 'chunk', parts: [{ kind: 'status', text: 'asking Gemini Enterprise' }] });
       await waitForAuth(controller.signal);
@@ -338,8 +338,7 @@
     if (job.kind === 'loader') runLoader(job);
     else if (job.kind === 'create') runCreate(job);
     else if (job.kind === 'chat') runChat(job);
-    else if (job.kind === 'video') unsupported(job, 'Video jobs run on the classic AiPASS chat tab. Close this Enterprise tab so the bridge can reach it.');
-    else if (job.kind === 'assistant') unsupported(job, 'Custom assistants run on the classic AiPASS chat tab. Close this Enterprise tab so the bridge can reach it.');
+    else if (job.kind === 'video' || job.kind === 'assistant') unsupported(job, 'This bridge sends text chat to Gemini Enterprise.');
     else unsupported(job, `Gemini Enterprise does not handle ${job.kind || 'this'} job.`);
   });
 

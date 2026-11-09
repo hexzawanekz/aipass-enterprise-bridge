@@ -1,6 +1,5 @@
 const $ = (id) => document.getElementById(id);
 
-const CHAT_URL = 'https://de.aipass.net/chat';
 let bridge = 'http://127.0.0.1:8787';
 let modelSignature = '';
 let currentAction = null;   // what the hero button does right now
@@ -62,9 +61,8 @@ function derive(sw, srv) {
       action: { text: 'Retry connection', run: reconnect } };
   }
   if (!sw.tab) {
-    return { key: 'warn', label: 'No AiPASS tab', pill: 'waiting',
-      hint: 'The bridge is up, but a Gemini Enterprise tab or a de.aipass.net tab must stay open. An open Enterprise tab is the one that runs.',
-      action: { text: 'Open AiPASS tab', run: openChatTab } };
+    return { key: 'warn', label: 'No Enterprise tab', pill: 'waiting',
+      hint: 'Open a signed-in Gemini Enterprise tab and leave it open. The address is on vertexaisearch.cloud.google and contains /cid/.' };
   }
   if (!srv.extensions) {
     return { key: 'warn', label: 'Tab not linked', pill: 'waiting',
@@ -81,11 +79,6 @@ async function reconnect() {
   await chrome.runtime.sendMessage({ type: 'reconnect' }).catch(() => {});
   toast('Reconnecting…');
   setTimeout(render, 400);
-}
-
-async function openChatTab() {
-  await chrome.tabs.create({ url: CHAT_URL });
-  window.close();
 }
 
 async function reloadChatTab() {
@@ -154,29 +147,13 @@ function renderModels(models, selected) {
   setText($('count'), models.length ? `(${models.length})` : '');
 }
 
-// Only gemini-3.1-flash-lite is free; everything else draws this pool down, and
-// until now the number lived solely in the web UI.
-//
-// The panel stays visible whenever the bridge answers, because a section that
-// vanishes reads as a missing feature rather than as a missing number — and the
-// two reasons it can be missing need different fixes. A bridge predating this
-// feature omits the key entirely; a current one sends null until a tab reports.
+// Gemini Enterprise does not report the classic credit pool, so the meter
+// stays hidden until a bridge response actually includes figures.
 function renderCredits(srv) {
   const box = $('creditsBox');
-  if (!srv) { box.hidden = true; return; }
+  const credits = srv?.credits;
+  if (!credits || !credits.limit) { box.hidden = true; return; }
   box.hidden = false;
-
-  const credits = srv.credits;
-  if (!credits || !credits.limit) {
-    const stale = !('credits' in srv);
-    $('creditsFill').style.width = '0%';
-    setClass($('creditsFill'), 'meter-fill', '');
-    setText($('creditsPct'), '');
-    setText($('creditsLeft'), '–');
-    setText($('creditsOf'), stale ? 'bridge is out of date — restart it' : 'waiting for the tab');
-    setText($('creditsReset'), '');
-    return;
-  }
 
   const n = (v) => v.toLocaleString('en-US', { maximumFractionDigits: v < 100 ? 1 : 0 });
   const share = Math.max(0, Math.min(1, credits.available / credits.limit));

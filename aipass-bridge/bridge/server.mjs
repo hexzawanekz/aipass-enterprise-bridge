@@ -1,8 +1,8 @@
-// Local bridge to de.aipass.net's chat.
+// Local bridge to a signed-in Gemini Enterprise tab.
 //
-// The bridge never sees a session cookie. It hands work to the Chrome
-// extension over SSE; the extension performs the real request from inside a
-// de.aipass.net page, where the browser attaches credentials itself.
+// The bridge never sees a bearer token or session cookie. It hands work to
+// the Chrome extension over SSE; the extension repeats the page's own
+// Discovery Engine calls from inside that tab.
 //
 // Scope is deliberately narrow: send the user's message, stream the reply
 // back. The server owns the conversation and its history, exactly as it does
@@ -357,7 +357,7 @@ class Job {
   }
   dispatch() {
     const client = pickClient();
-    if (!client) return this.fail('no extension connected — open a Gemini Enterprise tab, or a de.aipass.net tab, and check the popup');
+    if (!client) return this.fail('no extension connected — open a Gemini Enterprise tab and check the popup');
     this.client = client;
     sendToClient(client, 'job', this.kind === 'loader'
       ? { jobId: this.id, kind: 'loader', url: this.url }
@@ -553,7 +553,7 @@ async function resolveConversation() {
   if (!conversationList.length) await loadConversations();
   const pick = conversationList[conversationIndex];
   if (!pick) {
-    throw new Error('no usable conversation — open https://de.aipass.net/chat, start one, then POST /config {"conversation":null}');
+    throw new Error('no usable conversation — reload the Gemini Enterprise tab, or POST /config {"conversation":null}');
   }
   conversationCache = pick.id;
   conversationIsTemporary = pick.isTemporary === true;
@@ -1177,7 +1177,7 @@ const server = http.createServer(async (req, res) => {
 
     if (path === '/quota' || path === '/credits') {
       const quota = await getQuota({ force: url.searchParams.get('refresh') === '1' });
-      if (!quota) return oaiError(res, 503, 'no credit figures yet — open a de.aipass.net tab', 'unavailable');
+      if (!quota) return oaiError(res, 503, 'Gemini Enterprise does not expose a classic credit pool', 'unavailable');
       return json(res, 200, quota);
     }
 

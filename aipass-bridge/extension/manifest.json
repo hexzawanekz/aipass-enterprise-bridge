@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "aipass bridge",
+  "name": "aipass enterprise bridge",
   "version": "0.3.0",
-  "description": "Relays local OpenAI-compatible requests through an open Gemini Enterprise or de.aipass.net tab.",
+  "description": "Relays local OpenAI-compatible requests through an open Gemini Enterprise tab.",
   "permissions": [
     "storage",
     "alarms",
@@ -11,10 +11,7 @@
     "offscreen"
   ],
   "host_permissions": [
-    "https://*.aipass.net/*",
-    "https://aipass.net/*",
     "https://vertexaisearch.cloud.google/*",
-    "https://storage.googleapis.com/*",
     "http://127.0.0.1/*",
     "http://localhost/*"
   ],
@@ -23,28 +20,6 @@
     "type": "module"
   },
   "content_scripts": [
-    {
-      "matches": [
-        "https://*.aipass.net/*",
-        "https://aipass.net/*"
-      ],
-      "js": [
-        "page.js"
-      ],
-      "world": "MAIN",
-      "run_at": "document_start"
-    },
-    {
-      "matches": [
-        "https://*.aipass.net/*",
-        "https://aipass.net/*"
-      ],
-      "js": [
-        "content.js"
-      ],
-      "world": "ISOLATED",
-      "run_at": "document_start"
-    },
     {
       "matches": [
         "https://vertexaisearch.cloud.google/*"
@@ -68,6 +43,6 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "aipass bridge"
+    "default_title": "aipass enterprise bridge"
   }
 }

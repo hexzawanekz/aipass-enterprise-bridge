@@ -26,7 +26,7 @@ test('isPrivateHost catches every spelling of a private address', () => {
   for (const host of refused) assert.ok(isPrivateHost(host), `${host} must be refused`);
 
   const allowed = [
-    'example.com', 'de.aipass.net',
+    'example.com', 'vertexaisearch.cloud.google',
     '93.184.216.34', '172.32.0.1', '172.15.255.255', '169.253.0.1', '169.255.0.1',
     '::ffff:93.184.216.34', '2001:db8::1', 'fe00::1', 'ff00::1',
   ];

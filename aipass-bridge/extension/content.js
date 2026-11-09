@@ -1,4 +1,4 @@
-// ISOLATED world. Two jobs: relay between page.js and the service worker, and
+// ISOLATED world. Two jobs: relay between enterprise.js and the service worker, and
 // keep that worker alive.
 (() => {
 const GEN = (window.__aipassBridgeContentGen ?? 0) + 1;

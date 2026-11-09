@@ -9,7 +9,7 @@ noVNC. Nothing here modifies the bridge, the agent, or the extension.
 docker container
 ├── Xvfb + fluxbox      a virtual display
 ├── x11vnc + noVNC      view/drive that display in a browser  (:6080)
-├── chromium            loads ../extension, opens de.aipass.net/chat
+├── chromium            loads ../extension, opens Gemini Enterprise
 └── node ../bridge      the OpenAI-compatible bridge           (:8787)
 ```
 
@@ -17,7 +17,7 @@ docker container
 
 Three services here have **no authentication**: the bridge (`:8787`), and the
 noVNC desktop (`:6080`) unless you set a password. The noVNC desktop is a full
-remote view of a browser **logged into your de.aipass.net account** — treat the
+remote view of a browser **logged into your Gemini Enterprise account** — treat the
 port like a password.
 
 By default `docker-compose.yml` binds every port to **`127.0.0.1`**, so nothing
@@ -44,8 +44,9 @@ cp .env.example .env          # optionally set noVNC_PASSWORD
 Then:
 
 1. Tunnel to noVNC (command above) and open `http://127.0.0.1:6080`.
-2. In the Chrome window, log in at `https://de.aipass.net/chat` and leave the
-   tab open. The extension is already loaded.
+2. In the Chrome window, sign in to Gemini Enterprise and leave the tab open.
+   The address is on `vertexaisearch.cloud.google` and contains `/cid/`.
+   The extension is already loaded.
 3. Verify end to end:
 
 ```bash

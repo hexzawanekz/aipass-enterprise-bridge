@@ -10,7 +10,7 @@ EXT_COUNT=$(echo "$STATUS" | grep -o '"extensions":[0-9]*' | cut -d':' -f2)
 if [ "${EXT_COUNT:-0}" -gt 0 ] 2>/dev/null; then
     echo "OK: extension connected (extensions=$EXT_COUNT)"
 else
-    echo "WARN: extension not connected. Open https://de.aipass.net/chat in the noVNC window and log in."
+    echo "WARN: extension not connected. Open a signed-in Gemini Enterprise tab in the noVNC window."
 fi
 
 echo; echo "2. models (/v1/models)"

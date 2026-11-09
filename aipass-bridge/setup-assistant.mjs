@@ -43,7 +43,7 @@ if (!status) {
   process.exit(1);
 }
 if (!status.extensions) {
-  console.error(red('The extension is not connected. Open a https://de.aipass.net/chat tab.'));
+  console.error(red('The extension is not connected. Open a signed-in Gemini Enterprise tab and leave it open.'));
   process.exit(1);
 }
 

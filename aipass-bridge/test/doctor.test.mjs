@@ -42,7 +42,7 @@ test('a bridge with no tab attached says which tab to open', async () => {
     assert.equal(code, 1);
     assert.match(out, /✓ bridge/);
     assert.match(out, /✗ extension\s+no tab attached/);
-    assert.match(out, /de\.aipass\.net\/chat/);
+    assert.match(out, /Gemini Enterprise tab/);
     assert.match(out, /1 check failed/);
   } finally {
     solo.stop();

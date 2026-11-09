@@ -68,7 +68,7 @@ if (!status) {
   report('extension', 'ok', `${status.extensions} attached`);
 } else {
   report('extension', 'fail', 'no tab attached',
-    'open a signed-in Gemini Enterprise tab, or https://de.aipass.net/chat, and leave it open');
+    'open a signed-in Gemini Enterprise tab and leave it open');
 }
 
 /* 3 — models, which only load for a signed-in session */
@@ -85,7 +85,7 @@ if (!status?.extensions) {
     const real = models.some((m) => m.owned_by && m.owned_by !== 'aipass');
     if (real) report('login', 'ok', `signed in — ${models.length} models`);
     else report('login', 'fail', 'the model list came back empty or fallback-only',
-      'sign in on the Gemini Enterprise tab, or at https://de.aipass.net/chat, then reload that tab');
+      'sign in on the Gemini Enterprise tab, then reload it');
   } catch (err) {
     report('login', 'fail', err.message, 'check the bridge log');
   }
@@ -103,7 +103,7 @@ if (!status?.extensions) {
     report('credits', pct <= 5 ? 'warn' : 'ok', `${n(c.available)} of ${n(c.limit)} left (${pct}%)`,
       pct <= 5 ? 'nearly out — only gemini-3.1-flash-lite is free' : null);
   } else {
-    report('credits', 'warn', 'could not read the credit pool', 'not fatal — requests still work');
+    report('credits', 'ok', 'Gemini Enterprise has no separate credit pool');
   }
 }
 
@@ -117,7 +117,7 @@ if (!status?.extensions) {
     report('conversation', 'ok', res.body.current ?? `${list.length} available`);
   } else {
     report('conversation', 'fail', 'none found',
-      'reload the Gemini Enterprise tab, start a chat at https://de.aipass.net/chat, or POST /conversations/new');
+      'reload the Gemini Enterprise tab, or POST /conversations/new');
   }
 }
 
@@ -127,7 +127,7 @@ const free = models.find((m) => m.free_credit);
 if (NO_CHAT || !status?.extensions) {
   report('round trip', 'skip', NO_CHAT ? 'skipped (--no-chat)' : 'skipped');
 } else if (!free && !FORCE_CHAT) {
-  report('round trip', 'skip', 'skipped — no free-credit model', 'pass --chat to test with a paid one');
+  report('round trip', 'skip', 'skipped — pass --chat to send one test message');
 } else {
   const model = free?.id ?? status.defaultModel;
   const started = Date.now();

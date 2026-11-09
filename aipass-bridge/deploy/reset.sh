@@ -32,6 +32,6 @@ cat <<'NOTE'
 1. Open the noVNC desktop over an SSH tunnel:
      ssh -L 6080:127.0.0.1:6080 <you>@<server>
    then browse http://127.0.0.1:6080  (set noVNC_PASSWORD in .env to require a password)
-2. In the Chrome window, log in at https://de.aipass.net/chat and leave it open
+2. In the Chrome window, sign in to Gemini Enterprise and leave that tab open
 3. Run ./test.sh to verify the end-to-end connection
 NOTE

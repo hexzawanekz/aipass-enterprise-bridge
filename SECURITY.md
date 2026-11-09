@@ -1,14 +1,14 @@
 # Security
 
-This tool drives a browser that is logged into your AiPASS account. It never
+This tool drives a browser that is signed in to Gemini Enterprise. It never
 reads or forwards a credential — the real request runs as ordinary page
-JavaScript inside your own tab, and Chrome attaches the session cookie itself —
-but anything that can reach the bridge can *spend* that account. Treat the
-bridge port the way you would treat a password.
+JavaScript inside your own tab — but anything that can reach the bridge can
+send messages on that account. Treat the bridge port the way you would treat
+a password.
 
 ## Reporting
 
-Open a [security advisory](https://github.com/niawjunior/aipass-bridge/security/advisories/new),
+Open a [security advisory](https://github.com/hexzawanekz/aipass-enterprise-bridge/security/advisories/new),
 or email the maintainer if you would rather not file publicly. Please do not open
 a normal issue for something exploitable.
 

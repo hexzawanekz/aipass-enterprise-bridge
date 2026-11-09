@@ -1,16 +1,10 @@
 <div align="center">
 
-<img width="420" alt="aipass bridge" src="https://github.com/user-attachments/assets/e79fbcbb-0a47-494a-af70-b315586fe3a7" />
+# AiPASS Enterprise bridge
 
-# aipass bridge
+A local OpenAI-compatible API for a signed-in [Gemini Enterprise](https://vertexaisearch.cloud.google/) tab.
 
-**Make AiPASS great again — now with a terminal.**
-
-[AiPASS](https://aipass.go.th/) gives every Thai citizen free access to 30+ pro AI models.
-It only speaks one language though: a chat box. This puts it in your terminal, your
-editor, and any OpenAI-compatible tool — and lets it read and write your local files.
-
-[![test](https://github.com/niawjunior/aipass-bridge/actions/workflows/test.yml/badge.svg)](https://github.com/niawjunior/aipass-bridge/actions/workflows/test.yml)
+[![test](https://github.com/hexzawanekz/aipass-enterprise-bridge/actions/workflows/test.yml/badge.svg)](https://github.com/hexzawanekz/aipass-enterprise-bridge/actions/workflows/test.yml)
 
 </div>
 
@@ -19,26 +13,14 @@ editor, and any OpenAI-compatible tool — and lets it read and write your local
 ## What it does
 
 ```
-your terminal ──▶ OpenAI-compatible API on localhost:8787 ──▶ a real logged-in AiPASS tab
+your terminal ──▶ http://127.0.0.1:8787/v1 ──▶ Chrome extension ──▶ Gemini Enterprise tab
 ```
 
-- **Chat from the terminal**, streaming, with web search and sources.
-- **Every model the account can pick** — 33 of them, including the image, video
-  and music generators, grouped the way the web UI groups them.
-- **Generate images** — pick an image model, get a PNG
-  ([example](aipass-bridge/README.md#a-worked-example)).
-- **Attach documents** — `--file report.pdf`, and ask about it.
-- **Video and music too** — Seedance, Veo and Lyria, saved to disk like images
-  ([clip](aipass-bridge/README.md#video-from-a-real-run)). Video is a polled job
-  upstream, not a stream, and the bridge hides that difference.
-- **Edit local files** — an agent that reads, searches, and edits a project you point it at.
-- **See what it costs** — the credit pool, in the popup and after every agent run.
-- **Drop-in OpenAI endpoint** — point the `openai` SDK, or any tool that takes a base URL, at it.
-- **Run it headless** on a server so it stays up without your laptop.
+The extension watches the signed calls the page already makes, then repeats that same request shape for each chat. The bearer token stays in the tab. The bridge only receives the answer text.
 
-**No credential ever leaves your browser.** The real request runs as ordinary page
-JavaScript inside your own logged-in tab, so Chrome attaches the session cookie
-itself. The bridge never sees it, and nothing is written to disk.
+- **Text chat** from the terminal, or from any OpenAI-compatible client.
+- **One model id:** `gemini-enterprise`. The in-page Auto selector is what answers.
+- **Streaming** over `POST /v1/chat/completions`.
 
 ## Quick start
 
@@ -46,84 +28,97 @@ itself. The bridge never sees it, and nothing is written to disk.
 npm run dev
 ```
 
-Then load the extension — `chrome://extensions` → Developer mode → **Load unpacked**
-→ select `aipass-bridge/extension` — and open a [de.aipass.net/chat](https://de.aipass.net/chat)
-tab. The extension popup should read **Connected**.
+Load the extension: `chrome://extensions` → Developer mode → **Load unpacked** → select `aipass-bridge/extension`.
+
+Open your Gemini Enterprise home and leave it open. The address is on `vertexaisearch.cloud.google` and contains `/cid/`. Sign in, then reload that tab once so the extension can see a signed request. The popup should read **Connected**.
 
 ```bash
-npm run doctor                                     # is every link working?
-npm run setup-assistant                            # one-time: the agent's assistant
-npm run chat -- "ช่วยสรุปข่าว AI วันนี้"         # chat, streaming
-npm run chat -- "แมวน่ารัก" --model gpt-image-2   # generate an image
-npm run chat -- "summarise this" --file report.pdf # ask about a document
-npm run chat -- "a street at night" --model seedance-2.0-mini  # generate a video
-npm run agent -- "add a /health route" --root .    # edit local files (dry run)
-npm run models                                     # everything, by category
-npm run credits                                    # what is left of the pool
+npm run doctor
+npm run models
+npm run chat -- --model gemini-enterprise "สรุปให้สั้น ๆ"
 ```
 
-Note the `--` before a script's own flags: `npm run chat --new` is npm's flag,
-`npm run chat -- --new` is the script's. Every command takes `-- --help`.
+`npm run chat` with no question stays interactive. `/models` lists what the open tab serves, `/model gemini-enterprise` selects it, and Ctrl+C quits.
 
-If something is not working, `npm run doctor` walks the chain and names the one
-thing to fix:
+Pass `--` before the script's own flags: `npm run chat -- --model gemini-enterprise "hello"`. Every command takes `-- --help`.
+
+From code, point any OpenAI SDK at the bridge. The local server does not check the API key.
+
+```python
+from openai import OpenAI
+
+client = OpenAI(base_url="http://127.0.0.1:8787/v1", api_key="sk-dummy")
+stream = client.chat.completions.create(
+    model="gemini-enterprise",
+    messages=[{"role": "user", "content": "Reply with the single word: ok"}],
+    stream=True,
+)
+for chunk in stream:
+    print(chunk.choices[0].delta.content or "", end="", flush=True)
+```
+
+```typescript
+import OpenAI from "openai";
+
+const openai = new OpenAI({ baseURL: "http://127.0.0.1:8787/v1", apiKey: "sk-dummy" });
+const stream = await openai.chat.completions.create({
+  model: "gemini-enterprise",
+  messages: [{ role: "user", content: "Tell me a fun fact." }],
+  stream: true,
+});
+for await (const chunk of stream) process.stdout.write(chunk.choices[0]?.delta?.content || "");
+```
+
+## Commands
+
+| script | |
+|---|---|
+| `npm run dev` | start the bridge on `127.0.0.1:8787` |
+| `npm run chat` | terminal client |
+| `npm run models` | list the model the open tab serves |
+| `npm run conversations` | list conversations |
+| `npm run doctor` | check the bridge, the extension, and the signed-in tab |
+| `npm run agent -- "task" --root .` | local file tools, through the same chat endpoint |
+| `npm test` | run the test suite |
+
+`npm run doctor -- --chat` sends one short message. A plain `npm run doctor` skips that round trip.
+
+## When it is not working
 
 ```
 ✓ bridge         responding
 ✗ extension      no tab attached
-                 → open https://de.aipass.net/chat and leave it open
-– login          skipped — nothing attached to ask
+                 → open a signed-in Gemini Enterprise tab and leave it open
 ```
 
-Use it from code like any OpenAI endpoint:
+If a request says the tab could not be reached, reload the Enterprise page. If it says a signed API call could not be captured, reload the page again after you are signed in, then retry.
 
-```python
-from openai import OpenAI
-client = OpenAI(base_url="http://127.0.0.1:8787/v1", api_key="sk-dummy")
-```
+## Limits
 
-## Docs
-
-**→ [Full documentation](aipass-bridge/README.md)** — setup, the coding assistant
-and its action set, conversations, models, generating images / video / music,
-credits, configuration, troubleshooting, and tests.
-
-**→ [Headless deployment](aipass-bridge/deploy/README.md)** — Docker + noVNC, for
-running it 24/7 on a server.
-
-## Notes
-
-This drives **your own** AiPASS account through a browser you are already signed in
-to. It does not bypass authentication, scrape, or share anything — it gives a great
-free service the developer interface it was missing. Be reasonable with it, and keep
-your bridge on localhost.
-
-Built on Node with no runtime dependencies, plus an MV3 Chrome extension.
-`npm run dev:next` still starts the Next.js app that this repo was scaffolded from.
+- The Enterprise tab has to stay open and signed in.
+- Send text. Image and file uploads, video, and custom assistants are outside this bridge.
+- Gemini Enterprise does not expose the classic credit pool, so `npm run doctor` reports that there is no separate balance to read.
+- Only the latest user message is forwarded.
 
 ## Security
 
-The bridge has no authentication of its own — keep it on `127.0.0.1`. Anything
-that can reach the port can spend the account's credits.
+The bridge has no authentication of its own. Keep it on `127.0.0.1`. Anything that can reach the port can send messages through the signed-in tab.
 
-**If you cloned or forked before 2 Sep 2026, update.** Copies taken before
-[`8cad676`](https://github.com/niawjunior/aipass-bridge/commit/8cad676) have a
-bridge that any website you visited could drive. See [SECURITY.md](SECURITY.md).
+See [SECURITY.md](SECURITY.md).
 
-## Contributing
+## Headless
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). The short version: check
-`git config user.email` before you commit, run `npm test`, and list every file
-you touched — including the incidental ones.
+[`aipass-bridge/deploy`](aipass-bridge/deploy/README.md) runs the same bridge and extension in Docker with a noVNC desktop, for a server that stays up without your laptop.
 
-## Credits
+## Layout
 
-- [**astrathezero**](https://github.com/astrathezero) — the headless Docker
-  deployment, image upload, and the offscreen keepalive that stops the service
-  worker being evicted with no tab open.
-- [**meatasit**](https://github.com/meatasit) — Windows path resolution in the
-  test harness, and the two CLI bugs it uncovered.
+| | |
+|---|---|
+| `aipass-bridge/bridge/` | HTTP API and job hub |
+| `aipass-bridge/extension/` | Chrome extension. `enterprise.js` is the only script that talks to Gemini Enterprise |
+| `aipass-bridge/*.mjs` | `chat`, `doctor`, `list`, `agent` |
+| `aipass-bridge/test/` | the suite. `harness.mjs` stands in for the extension |
 
 ## License
 
-[MIT](LICENSE). Contributions are welcome and are taken under the same terms.
+[MIT](LICENSE).

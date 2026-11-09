@@ -47,7 +47,7 @@ or a README line moved in passing is the kind of thing that gets merged unnotice
 and finding it during review costs more trust than mentioning it would have.
 
 **Say what you actually verified.** `npm test` passing is worth stating — but note
-that **no test reaches the extension**. `background.js`, `content.js`, `page.js`
+that **no test reaches the extension**. `background.js`, `content.js`, `enterprise.js`
 and `offscreen.js` are replaced by the harness, so a green suite says nothing
 about a change to any of them. If you changed extension code, the useful sentence
 is what you observed in a browser and for how long.
@@ -67,7 +67,7 @@ idea lands the same day without the cleanup arriving under your name.
 
 | | |
 |---|---|
-| `aipass-bridge/bridge/` | the HTTP surface, job hub, conversations, models, credits |
+| `aipass-bridge/bridge/` | the HTTP surface, job hub, conversations, and models |
 | `aipass-bridge/extension/` | MV3 extension — the only code that touches a credential |
 | `aipass-bridge/*.mjs` | the CLIs: chat, agent, doctor, list |
 | `aipass-bridge/test/` | the suite, plus `harness.mjs` which stands in for the extension |

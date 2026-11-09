@@ -1,5 +1,5 @@
 // A context Chrome does not discard, holding one port open so the service worker
-// is not evicted while no de.aipass.net tab is available to do it.
+// is not evicted while no Gemini Enterprise tab is available to do it.
 //
 // The port is the whole mechanism: an open runtime port with traffic on it is
 // what resets the worker's idle timer. Nothing else here needs to happen.

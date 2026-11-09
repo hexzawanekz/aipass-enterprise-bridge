@@ -7,7 +7,7 @@
 
 ## How it was verified
 <!-- `npm test` passing is worth stating. But no test reaches the extension:
-     background.js, content.js, page.js and offscreen.js are replaced by the
+     background.js, content.js, enterprise.js and offscreen.js are replaced by the
      harness, so a green suite says nothing about a change to those. If you
      touched extension code, say what you observed in a browser and for how long. -->
 
