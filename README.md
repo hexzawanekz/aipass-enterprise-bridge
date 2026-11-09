@@ -78,10 +78,25 @@ for await (const chunk of stream) process.stdout.write(chunk.choices[0]?.delta?.
 | `npm run models` | list the model the open tab serves |
 | `npm run conversations` | list conversations |
 | `npm run doctor` | check the bridge, the extension, and the signed-in tab |
+| `npm run autostart` | start the bridge on port 8787 every time you sign in |
 | `npm run agent -- "task" --root .` | local file tools, through the same chat endpoint |
 | `npm test` | run the test suite |
 
 `npm run doctor -- --chat` sends one short message. A plain `npm run doctor` skips that round trip.
+
+## Start when you sign in
+
+One command registers the bridge so it is already listening on `http://127.0.0.1:8787` after you sign in to Windows or macOS, including after a restart.
+
+```bash
+npm run autostart                 # install, and start it now when the port is free
+npm run autostart -- status
+npm run autostart -- uninstall
+```
+
+Windows creates a logon task named **AiPASS Enterprise Bridge**. macOS writes a LaunchAgent, `com.aipass.enterprise-bridge`. The task uses the Node binary that ran the installer, so it still starts when a terminal PATH is not loaded yet. Logs go to `%LOCALAPPDATA%\aipass-enterprise-bridge\bridge.log` on Windows and `~/Library/Logs/aipass-enterprise-bridge/bridge.log` on macOS.
+
+Run `npm run autostart` again after you move the checkout or change Node versions. The Gemini Enterprise tab still has to be open in Chrome for a chat to run. The bridge process itself no longer needs a terminal.
 
 ## When it is not working
 

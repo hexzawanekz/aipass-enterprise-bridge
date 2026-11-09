@@ -12,6 +12,7 @@
     "models": "node aipass-bridge/list.mjs models",
     "conversations": "node aipass-bridge/list.mjs conversations",
     "doctor": "node aipass-bridge/doctor.mjs",
+    "autostart": "node aipass-bridge/autostart.mjs",
     "dev:next": "next dev",
     "build": "next build",
     "start": "next start",

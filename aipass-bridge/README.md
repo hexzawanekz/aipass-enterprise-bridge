@@ -29,6 +29,8 @@ npm run chat -- --model gemini-enterprise "สรุปให้สั้น ๆ
 
 Any OpenAI-compatible client can use base URL `http://127.0.0.1:8787/v1`, model `gemini-enterprise`, and any API key. The local server does not check the key.
 
+`npm run autostart` registers that same server to start at sign-in on Windows and macOS, on `127.0.0.1:8787`. `npm run autostart -- uninstall` removes it.
+
 ## Files
 
 | | |
@@ -39,6 +41,7 @@ Any OpenAI-compatible client can use base URL `http://127.0.0.1:8787/v1`, model 
 | `extension/background.js` | holds the bridge connection and picks the Enterprise tab |
 | `chat.mjs` | terminal client |
 | `doctor.mjs` | checks each link and names the one to fix |
+| `autostart.mjs` | `npm run autostart`, sign-in start on Windows and macOS |
 | `list.mjs` | `npm run models` and `npm run conversations` |
 | `deploy/` | optional Docker + noVNC desktop |
 
