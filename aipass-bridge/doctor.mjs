@@ -68,7 +68,7 @@ if (!status) {
   report('extension', 'ok', `${status.extensions} attached`);
 } else {
   report('extension', 'fail', 'no tab attached',
-    'open https://de.aipass.net/chat and leave it open; the popup should read "connected"');
+    'open a signed-in Gemini Enterprise tab, or https://de.aipass.net/chat, and leave it open');
 }
 
 /* 3 — models, which only load for a signed-in session */
@@ -85,7 +85,7 @@ if (!status?.extensions) {
     const real = models.some((m) => m.owned_by && m.owned_by !== 'aipass');
     if (real) report('login', 'ok', `signed in — ${models.length} models`);
     else report('login', 'fail', 'the model list came back empty or fallback-only',
-      'sign in at https://de.aipass.net/chat, then reload the tab');
+      'sign in on the Gemini Enterprise tab, or at https://de.aipass.net/chat, then reload that tab');
   } catch (err) {
     report('login', 'fail', err.message, 'check the bridge log');
   }
@@ -117,7 +117,7 @@ if (!status?.extensions) {
     report('conversation', 'ok', res.body.current ?? `${list.length} available`);
   } else {
     report('conversation', 'fail', 'none found',
-      'start one chat at https://de.aipass.net/chat, or POST /conversations/new');
+      'reload the Gemini Enterprise tab, start a chat at https://de.aipass.net/chat, or POST /conversations/new');
   }
 }
 

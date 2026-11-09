@@ -63,7 +63,7 @@ function derive(sw, srv) {
   }
   if (!sw.tab) {
     return { key: 'warn', label: 'No AiPASS tab', pill: 'waiting',
-      hint: 'The bridge is up, but a de.aipass.net tab must stay open for requests to run.',
+      hint: 'The bridge is up, but a Gemini Enterprise tab or a de.aipass.net tab must stay open. An open Enterprise tab is the one that runs.',
       action: { text: 'Open AiPASS tab', run: openChatTab } };
   }
   if (!srv.extensions) {

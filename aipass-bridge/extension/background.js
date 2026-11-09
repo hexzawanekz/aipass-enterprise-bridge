@@ -1,5 +1,6 @@
 // Service worker: holds the long-lived connection to the local bridge and
-// routes each job into a de.aipass.net tab.
+// routes each job into a Gemini Enterprise tab, or a de.aipass.net tab when
+// no Enterprise tab is open.
 //
 // The connection lives here rather than in the content script because an
 // https:// page talking to http://127.0.0.1 runs into mixed-content and
@@ -80,13 +81,28 @@ async function post(path, body) {
   }
 }
 
-async function findChatTab() {
-  const tabs = await chrome.tabs.query({ url: ['https://*.aipass.net/*', 'https://aipass.net/*'] });
-  if (!tabs.length) return null;
+const CLASSIC_URLS = ['https://*.aipass.net/*', 'https://aipass.net/*'];
+const ENTERPRISE_URLS = ['https://vertexaisearch.cloud.google/*'];
+
+const isEnterprise = (tab) => typeof tab?.url === 'string' && tab.url.startsWith('https://vertexaisearch.cloud.google/');
+
+function preferTab(tabs) {
   const live = tabs.filter((t) => !t.discarded && t.status !== 'unloaded');
   const pool = live.length ? live : tabs;
-  // Prefer a tab already sitting on a chat route.
-  return pool.find((t) => t.url?.includes('/chat')) ?? pool[0];
+  return pool.find((t) => t.url?.includes('/cid/') || t.url?.includes('/chat')) ?? pool[0] ?? null;
+}
+
+async function findChatTab() {
+  const [enterprise, classic] = await Promise.all([
+    chrome.tabs.query({ url: ENTERPRISE_URLS }),
+    chrome.tabs.query({ url: CLASSIC_URLS }),
+  ]);
+  const live = (tabs) => tabs.filter((t) => !t.discarded && t.status !== 'unloaded');
+  // A loaded Enterprise tab wins. A discarded one must not hide a working classic tab.
+  return preferTab(live(enterprise))
+    ?? preferTab(live(classic))
+    ?? preferTab(enterprise)
+    ?? preferTab(classic);
 }
 
 function waitForComplete(tabId, timeoutMs = 15_000) {
@@ -112,7 +128,8 @@ async function ensureContentScript(tab) {
     await waitForComplete(tab.id);
   }
 
-  await chrome.scripting.executeScript({ target: { tabId: tab.id }, world: 'MAIN', files: ['page.js'] }).catch(() => {});
+  const pageFile = isEnterprise(tab) ? 'enterprise.js' : 'page.js';
+  await chrome.scripting.executeScript({ target: { tabId: tab.id }, world: 'MAIN', files: [pageFile] }).catch(() => {});
   if (!ok) {
     await chrome.scripting.executeScript({ target: { tabId: tab.id }, world: 'ISOLATED', files: ['content.js'] }).catch(() => {});
     await ping();
@@ -122,7 +139,7 @@ async function ensureContentScript(tab) {
 async function handleJob(job) {
   const tab = await findChatTab();
   if (!tab) {
-    await post('/ext/error', { jobId: job.jobId, message: 'no de.aipass.net tab is open' });
+    await post('/ext/error', { jobId: job.jobId, message: 'no Gemini Enterprise or de.aipass.net tab is open' });
     return;
   }
   jobTabs.set(job.jobId, tab.id);
@@ -133,7 +150,7 @@ async function handleJob(job) {
     jobTabs.delete(job.jobId);
     await post('/ext/error', {
       jobId: job.jobId,
-      message: `could not reach the de.aipass.net tab (${tab.url ?? tab.id}): ${err?.message ?? err}`,
+      message: `could not reach the chat tab (${tab.url ?? tab.id}): ${err?.message ?? err}`,
     });
   }
 }

@@ -357,7 +357,7 @@ class Job {
   }
   dispatch() {
     const client = pickClient();
-    if (!client) return this.fail('no extension connected — open a de.aipass.net tab and check the popup');
+    if (!client) return this.fail('no extension connected — open a Gemini Enterprise tab, or a de.aipass.net tab, and check the popup');
     this.client = client;
     sendToClient(client, 'job', this.kind === 'loader'
       ? { jobId: this.id, kind: 'loader', url: this.url }
