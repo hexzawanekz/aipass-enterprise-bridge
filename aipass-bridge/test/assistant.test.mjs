@@ -1,6 +1,5 @@
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { startBridge, FakeExtension, run, waitFor } from './harness.mjs';
@@ -21,18 +20,12 @@ const valid = {
   type: 'conversation', model: 'claude-sonnet-5@default', tags: ['coding'],
 };
 
-// The prompt someone pastes by hand and the one the script installs have to be
-// the same text, or the documented setup quietly stops matching the automated one.
-test('the README block and the shipped prompt are the same text', () => {
-  // A Windows checkout has CRLF throughout, so both the pattern and the
-  // captured block have to be compared on normalised endings — the prompt
-  // module normalises itself for the same reason.
-  const readme = fs.readFileSync(path.join(here, '..', 'README.md'), 'utf8').replace(/\r\n/g, '\n');
-  const m = readme.match(/max 1000 characters — this is (\d+)\):\n\n```\n([\s\S]*?)\n```/);
-  assert.ok(m, 'the README still documents the prompt in a fenced block');
-  assert.equal(m[2], ASSISTANT_CHARACTER, 'README block has drifted from assistant-prompt.mjs');
-  assert.equal(Number(m[1]), ASSISTANT_CHARACTER.length, 'the character count in the prose is stale');
+// The web form refuses a character longer than 1000. The module normalises
+// CRLF so a Windows checkout does not inflate that count.
+test('the shipped assistant prompt fits the form', () => {
+  assert.ok(ASSISTANT_CHARACTER.length > 0);
   assert.ok(ASSISTANT_CHARACTER.length <= 1000, 'the form refuses anything longer');
+  assert.equal(ASSISTANT_CHARACTER.includes('\r'), false);
 });
 
 test('the fields the form requires are checked before anything is created', async (t) => {

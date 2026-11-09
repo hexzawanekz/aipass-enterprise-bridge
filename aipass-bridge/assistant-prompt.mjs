@@ -1,9 +1,8 @@
 // The behaviour the custom assistant carries, so the agent does not resend it
 // on every run. The web form caps this field at 1000 characters.
 //
-// This is the single source: the block in README.md is checked against it by
-// the test suite, so the copy someone pastes by hand cannot drift from the one
-// `npm run setup-assistant` installs.
+// This is the single source `setup-assistant.mjs` installs. The test suite
+// checks that it still fits the form's 1000-character cap.
 //
 // Normalised at the end because a Windows checkout turns every newline in this
 // file into CRLF, which would both inflate the count past the form's 1000 and
