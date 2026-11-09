@@ -119,6 +119,10 @@ See [SECURITY.md](SECURITY.md).
 | `aipass-bridge/*.mjs` | `chat`, `doctor`, `list`, `agent` |
 | `aipass-bridge/test/` | the suite. `harness.mjs` stands in for the extension |
 
+## Credit
+
+Built on [aipass-bridge](https://github.com/niawjunior/aipass-bridge) by [niawjunior](https://github.com/niawjunior).
+
 ## License
 
 [MIT](LICENSE).
